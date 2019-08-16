@@ -12,3 +12,5 @@ To **add** new item go to http://localhost:8080/zradlo?query=mutation+_{create(n
 To **update** one of items go to http://localhost:8080/zradlo?query=mutation+_{update(id:%YOURID%,name:"%YOURNAME%",price:%YOURPRICE%){id,name,price}}
 
 To **delete** one of items by ID go to http://localhost:8080/zradlo?query=mutation+_{delete(id:%YOURID%){id,name,price}}
+
+To **delete multiple items** go to http://localhost:8080/zradlo?query=mutation+_{deleteMore(ids:"%YOURID1%,%YOURID2%"){id,name,price}}. Note that you mustn't write spaces between ids. Use comma separator.
