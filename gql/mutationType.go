@@ -5,6 +5,8 @@ import (
 	"../utils"
 	"errors"
 	"github.com/graphql-go/graphql"
+	"strconv"
+	"strings"
 )
 
 func createZradlo(zradla *[]*models.Zradlo) func(p graphql.ResolveParams) (i interface{}, e error) {
@@ -112,12 +114,49 @@ func deleteZradlo(zradla *[]*models.Zradlo) graphql.FieldResolveFn {
 		if err != nil {
 			return nil, err
 		}
-
-		zr := *zradla
-		zradlo := zr[index]
-		*zradla = append(zr[:index], zr[index+1:]...)
+		_, zradlo := utils.DeleteByID(index, zradla)
 
 		return zradlo, nil
+	}
+}
+
+func deleteMore(zradla *[]*models.Zradlo) *graphql.Field {
+	return &graphql.Field{
+		Type:        graphql.NewList(ZradloType),
+		Description: "Delete more than one zradlo",
+		Args: graphql.FieldConfigArgument{
+			"ids": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+		},
+		Resolve: deleteMoreZr(zradla),
+	}
+}
+
+func deleteMoreZr(zradla *[]*models.Zradlo) graphql.FieldResolveFn {
+	return func(p graphql.ResolveParams) (i interface{}, e error) {
+		ids, idsOk := p.Args["ids"].(string)
+		if !idsOk {
+			return nil, errors.New(`cannot find "ids" in query`)
+		}
+		arrayIds := strings.Split(ids, ",")
+		var deletedZradla []*models.Zradlo
+		for _, id := range arrayIds {
+			intId, err := strconv.Atoi(id)
+
+			if err != nil {
+				return nil, err
+			}
+			index, err := utils.FindID(intId, *zradla)
+
+			if err != nil {
+				return nil, err
+			}
+			_, zradlo := utils.DeleteByID(index, zradla)
+
+			deletedZradla = append(deletedZradla, zradlo)
+		}
+		return deletedZradla, nil
 	}
 }
 
@@ -126,9 +165,10 @@ func MutationType(zradla *[]*models.Zradlo) *graphql.Object {
 		graphql.ObjectConfig{
 			Name: "Mutation",
 			Fields: graphql.Fields{
-				"create": create(zradla),
-				"update": update(zradla),
-				"delete": deleteQL(zradla),
+				"create":     create(zradla),
+				"update":     update(zradla),
+				"delete":     deleteQL(zradla),
+				"deleteMore": deleteMore(zradla),
 			},
 		},
 	)

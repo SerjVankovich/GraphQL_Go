@@ -38,3 +38,11 @@ func FindID(id int, zradla []*models.Zradlo) (int, error) {
 
 	return 0, errors.New(`cannot find zradlo on this id`)
 }
+
+func DeleteByID(id int, zradla *[]*models.Zradlo) (*[]*models.Zradlo, *models.Zradlo) {
+	zr := *zradla
+	zradlo := zr[id]
+	*zradla = append(zr[:id], zr[id+1:]...)
+
+	return zradla, zradlo
+}
