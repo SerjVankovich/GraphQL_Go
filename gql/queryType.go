@@ -1,37 +1,33 @@
 package gql
 
 import (
-	"../models"
+	"../db"
+	"database/sql"
 	"errors"
 	"github.com/graphql-go/graphql"
 )
 
-func findById(zradla *[]*models.Zradlo) func(p graphql.ResolveParams) (i interface{}, e error) {
+func findById(dataBase *sql.DB) func(p graphql.ResolveParams) (i interface{}, e error) {
 	return func(p graphql.ResolveParams) (i interface{}, e error) {
 		id, ok := p.Args["id"].(int)
 		if ok {
-			for _, zradlo := range *zradla {
-				if id == int(zradlo.ID) {
-					return zradlo, nil
-				}
-			}
+			return db.GetZradloByID(dataBase, id)
 		}
-
 		return nil, errors.New("zradlo not found")
 	}
 }
 
-func getZradla(zradla *[]*models.Zradlo) *graphql.Field {
+func getZradla(dataBase *sql.DB) *graphql.Field {
 	return &graphql.Field{
 		Type:        graphql.NewList(ZradloType),
 		Description: "Get all zradla",
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			return zradla, nil
+			return db.GetAllZradla(dataBase)
 		},
 	}
 }
 
-func getZradlo(zradla *[]*models.Zradlo) *graphql.Field {
+func getZradlo(dataBase *sql.DB) *graphql.Field {
 	return &graphql.Field{
 		Type:        ZradloType,
 		Description: "Get zradlo by id",
@@ -40,18 +36,18 @@ func getZradlo(zradla *[]*models.Zradlo) *graphql.Field {
 				Type: graphql.Int,
 			},
 		},
-		Resolve: findById(zradla),
+		Resolve: findById(dataBase),
 	}
 }
 
-func QueryType(zradla *[]*models.Zradlo) *graphql.Object {
+func QueryType(dataBase *sql.DB) *graphql.Object {
 	return graphql.NewObject(
 		graphql.ObjectConfig{
 			Name: "Query",
 			Fields: graphql.Fields{
-				"zradlo": getZradlo(zradla),
+				"zradlo": getZradlo(dataBase),
 
-				"zradla": getZradla(zradla),
+				"zradla": getZradla(dataBase),
 			},
 		},
 	)

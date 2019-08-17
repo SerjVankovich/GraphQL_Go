@@ -2,8 +2,18 @@ package utils
 
 import (
 	"../models"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
 )
+
+type config struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+	Sslmode  string `json:"sslmode"`
+}
 
 func GetMaxID(zradla []*models.Zradlo) int {
 	if len(zradla) == 0 {
@@ -45,4 +55,30 @@ func DeleteByID(id int, zradla *[]*models.Zradlo) (*[]*models.Zradlo, *models.Zr
 	*zradla = append(zr[:id], zr[id+1:]...)
 
 	return zradla, zradlo
+}
+
+func ParseConfig(path string) string {
+	file, err := os.Open(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	byteValue, _ := ioutil.ReadAll(file)
+	var config config
+	err = json.Unmarshal(byteValue, &config)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	return "user=" +
+		config.User +
+		" password=" +
+		config.Password +
+		" dbname=" +
+		config.Dbname +
+		" sslmode=" +
+		config.Sslmode
+
 }

@@ -1,15 +1,15 @@
 package gql
 
 import (
-	"../models"
+	"database/sql"
 	"github.com/graphql-go/graphql"
 )
 
-func Schema(zradla *[]*models.Zradlo) (graphql.Schema, error) {
+func Schema(dataBase *sql.DB) (graphql.Schema, error) {
 	return graphql.NewSchema(
 		graphql.SchemaConfig{
-			Query:    QueryType(zradla),
-			Mutation: MutationType(zradla),
+			Query:    QueryType(dataBase),
+			Mutation: MutationType(dataBase),
 		},
 	)
 }

@@ -1,18 +1,12 @@
 package main
 
 import (
+	"./db"
 	"./gql"
-	"./models"
 	"encoding/json"
 	"github.com/graphql-go/graphql"
 	"net/http"
 )
-
-var zradla = []*models.Zradlo{
-	{1, "Pizza", 600},
-	{2, "Sushi", 1000},
-	{3, "Borsch", 200},
-}
 
 func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(
@@ -26,7 +20,9 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
-	var schema, _ = gql.Schema(&zradla)
+	dataBase := db.Connect()
+	defer dataBase.Close()
+	var schema, _ = gql.Schema(dataBase)
 	http.HandleFunc("/zradlo", func(writer http.ResponseWriter, request *http.Request) {
 		result := executeQuery(request.URL.Query().Get("query"), schema)
 		_ = json.NewEncoder(writer).Encode(result)
