@@ -1,6 +1,25 @@
 # GraphQL_Go
 Simple graphQL backend on Golang
 
+To use this backend you need PostgreSQL database on your PC with table **"zradlo"** and columns:
+* **ID** (integer)
+* **Name** (character varying(255))
+* **Price** (real)
+
+To connect DB make **config.json** file in **"db"** directory:
+
+    {
+
+      "user": %PGUSER%,
+  
+      "password": %PGPASSWORD%,
+  
+      "dbname": %PDDATABASE%,
+  
+      "sslmode": "disable" | "enable"
+
+    }
+
 To test it, run "go build main.go" and run the compiled file, then go to the endpoint: http://localhost:8080/zradlo
 
 To **get all** items go to http://localhost:8080/zradlo?query={zradla{name,id,price}}
