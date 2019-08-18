@@ -40,7 +40,7 @@ func getZradlo(dataBase *sql.DB) *graphql.Field {
 	}
 }
 
-func QueryType(dataBase *sql.DB) *graphql.Object {
+func ZradloQueryType(dataBase *sql.DB) *graphql.Object {
 	return graphql.NewObject(
 		graphql.ObjectConfig{
 			Name: "Query",

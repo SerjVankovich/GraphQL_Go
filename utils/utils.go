@@ -4,7 +4,9 @@ import (
 	"../models"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/smtp"
 	"os"
 )
 
@@ -13,6 +15,15 @@ type config struct {
 	Password string `json:"password"`
 	Dbname   string `json:"dbname"`
 	Sslmode  string `json:"sslmode"`
+}
+
+type secret struct {
+	JWTSecret string `json:"json-secret"`
+}
+
+type Sender struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func GetMaxID(zradla []*models.Zradlo) int {
@@ -80,5 +91,61 @@ func ParseConfig(path string) string {
 		config.Dbname +
 		" sslmode=" +
 		config.Sslmode
+}
+
+func ParseSecret(path string) []byte {
+	file, err := os.Open(path)
+
+	if err != nil {
+		panic(err)
+	}
+	byteValue, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var json_secret secret
+
+	err = json.Unmarshal(byteValue, &json_secret)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return []byte(json_secret.JWTSecret)
+}
+
+func SendEmail(email string, password string) {
+	path, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	file, err := os.Open(path + "\\keys.json")
+
+	if err != nil {
+		panic(err)
+	}
+
+	byteValue, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var sender Sender
+
+	err = json.Unmarshal(byteValue, &sender)
+
+	if err != nil {
+		panic(err)
+	}
+
+	auth := smtp.PlainAuth("", sender.Email, sender.Password, "smtp.gmail.com")
+	err = smtp.SendMail("smtp.gmail.com:587", auth, sender.Email, []string{email}, []byte("Привет"))
+
+	fmt.Println(err.Error())
 
 }

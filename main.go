@@ -3,33 +3,43 @@ package main
 import (
 	"./db"
 	"./gql"
-	"encoding/json"
-	"github.com/graphql-go/graphql"
+	"./handlers"
+	"./utils"
+	jwtmiddleware "github.com/auth0/go-jwt-middleware"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"os"
 )
-
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	result := graphql.Do(
-		graphql.Params{
-			Schema:        schema,
-			RequestString: query,
-		},
-	)
-
-	return result
-}
 
 func main() {
 	dataBase := db.Connect()
 	defer dataBase.Close()
-	var schema, _ = gql.Schema(dataBase)
-	http.HandleFunc("/zradlo", func(writer http.ResponseWriter, request *http.Request) {
-		result := executeQuery(request.URL.Query().Get("query"), schema)
-		_ = json.NewEncoder(writer).Encode(result)
 
+	path, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	var secret = utils.ParseSecret(path + "\\keys.json")
+
+	var jwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
+		ValidationKeyGetter: func(token *jwt.Token) (i interface{}, e error) {
+			return secret, nil
+		},
+		SigningMethod: jwt.SigningMethodHS256,
 	})
 
-	err := http.ListenAndServe(":8080", nil)
+	var zradloSchema, _ = gql.ZradloSchema(dataBase)
+	var registerSchema = gql.RegistrationSchema
+
+	http.HandleFunc("/zradlo", jwtMiddleware.Handler(handlers.GQLHandler(zradloSchema)).ServeHTTP)
+	http.HandleFunc("/get-token", handlers.GetTokenHandler(secret).ServeHTTP)
+
+	//register doesn't work
+	http.HandleFunc("/register", handlers.GQLHandler(registerSchema).ServeHTTP)
+
+	err = http.ListenAndServe(":8080", nil)
 
 	if err != nil {
 		panic(err)

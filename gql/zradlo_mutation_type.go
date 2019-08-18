@@ -163,7 +163,7 @@ func deleteMoreZr(dataBase *sql.DB) graphql.FieldResolveFn {
 	}
 }
 
-func MutationType(dataBase *sql.DB) *graphql.Object {
+func ZradloMutationType(dataBase *sql.DB) *graphql.Object {
 	return graphql.NewObject(
 		graphql.ObjectConfig{
 			Name: "Mutation",
