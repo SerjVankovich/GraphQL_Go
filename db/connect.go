@@ -4,10 +4,14 @@ import (
 	"../models"
 	"../utils"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"os"
 )
+
+var dberr = errors.New("you don't provide DataBase to function")
+var zradloEmpty = errors.New("you don't provide zradlo to function")
 
 func Connect() *sql.DB {
 	path, err := os.Getwd()
@@ -25,6 +29,9 @@ func Connect() *sql.DB {
 }
 
 func GetAllZradla(db *sql.DB) (*[]*models.Zradlo, error) {
+	if db == nil {
+		return nil, dberr
+	}
 	var zradla []*models.Zradlo
 
 	rows, err := db.Query("SELECT * FROM public.zradlo")
@@ -47,6 +54,10 @@ func GetAllZradla(db *sql.DB) (*[]*models.Zradlo, error) {
 }
 
 func GetZradloByID(db *sql.DB, id int) (*models.Zradlo, error) {
+	if db == nil {
+		return nil, dberr
+	}
+
 	row := db.QueryRow(`SELECT * FROM public.zradlo WHERE "ID" = $1`, id)
 	zradlo := new(models.Zradlo)
 	err := row.Scan(&zradlo.ID, &zradlo.Price, &zradlo.Name)
@@ -59,6 +70,12 @@ func GetZradloByID(db *sql.DB, id int) (*models.Zradlo, error) {
 }
 
 func InsertZradlo(db *sql.DB, zradlo *models.Zradlo) (*models.Zradlo, error) {
+	if db == nil {
+		return nil, dberr
+	}
+	if zradlo == nil {
+		return nil, zradloEmpty
+	}
 	_, err := db.Exec(`INSERT INTO public.zradlo("ID", "Price", "Name")VALUES (default, $2, $1)`,
 		zradlo.Name,
 		zradlo.Price)
@@ -70,6 +87,12 @@ func InsertZradlo(db *sql.DB, zradlo *models.Zradlo) (*models.Zradlo, error) {
 }
 
 func UpdateZradlo(db *sql.DB, zradlo *models.Zradlo) (*models.Zradlo, error) {
+	if db == nil {
+		return nil, dberr
+	}
+	if zradlo == nil {
+		return nil, zradloEmpty
+	}
 	_, err := db.Exec(`UPDATE public.zradlo SET "Name" = $1, "Price" = $2 WHERE "ID" = $3`,
 		zradlo.Name,
 		zradlo.Price,
@@ -84,6 +107,9 @@ func UpdateZradlo(db *sql.DB, zradlo *models.Zradlo) (*models.Zradlo, error) {
 }
 
 func DeleteZradlo(db *sql.DB, id int) error {
+	if db == nil {
+		return dberr
+	}
 	_, err := db.Exec(`DELETE FROM public.zradlo WHERE "ID" = $1`, id)
 	return err
 }
