@@ -20,7 +20,7 @@ To connect DB make **config.json** file in **"db"** directory:
 
     }
     
-To be able to get JWT Token make **keys.json** file in project directory:
+To be able to get **JWT Token** make **keys.json** file in project directory:
 
     {
         "json-secret": %YOURSECRET%
@@ -28,7 +28,7 @@ To be able to get JWT Token make **keys.json** file in project directory:
 
 To test it, run "go build main.go" and run the compiled file, then go to the endpoint: http://localhost:8080/zradlo
 
-To get each of endpoints you need to get JWT Token. To do it go to
+To go to each of endpoints you need to get **JWT Token**. To do it go to
 http://localhost:8080/get-token and save it.
 With each request provide your Token in Header:
     
