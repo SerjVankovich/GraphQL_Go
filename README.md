@@ -34,6 +34,9 @@ With each request provide your Token in Header:
     
     "Authorization": "bearer %YOURTOKEN%"
 
+To **register** on service go to http://localhost:8080/register?query=mutation+_{register(email:"%YOUREMAIL%",password:"%YOURPASSWORD%"){regLink}}
+A letter will be sent on your Email with confirmation link.
+
 To **get all** items go to http://localhost:8080/zradlo?query={zradla{name,id,price}}
 Don't forget to provide **JWT Token**
 
