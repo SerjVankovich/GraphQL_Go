@@ -11,12 +11,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/mail"
 	"net/smtp"
 	"os"
+	"time"
 )
 
 type config struct {
@@ -302,4 +304,18 @@ func createHash(s string) string {
 	hash.Write([]byte(s))
 
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func CreateToken(secret []byte, email string) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := make(jwt.MapClaims)
+	claims["email"] = email
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	token.Claims = claims
+
+	tokenString, err := token.SignedString(secret)
+
+	return tokenString, err
 }

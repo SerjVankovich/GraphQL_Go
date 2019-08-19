@@ -11,5 +11,5 @@ type User struct {
 }
 
 type CompleteRegistration struct {
-	Successful bool `json:"successful"`
+	Token string `json:"token"`
 }

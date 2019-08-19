@@ -32,12 +32,11 @@ func main() {
 
 	var zradloSchema, _ = gql.ZradloSchema(dataBase)
 	var registerSchema = gql.RegistrationSchema
+	var loginSchema = gql.LoginSchema(dataBase)
 
 	http.HandleFunc("/zradlo", jwtMiddleware.Handler(handlers.GQLHandler(zradloSchema)).ServeHTTP)
-	http.HandleFunc("/get-token", handlers.GetTokenHandler(secret).ServeHTTP)
-
-	//register doesn't work
 	http.HandleFunc("/register", handlers.GQLHandler(registerSchema(dataBase)).ServeHTTP)
+	http.HandleFunc("/login", handlers.GQLHandler(loginSchema).ServeHTTP)
 
 	err = http.ListenAndServe(":8080", nil)
 

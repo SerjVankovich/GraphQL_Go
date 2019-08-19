@@ -94,7 +94,7 @@ func RegistrationMutationType(dataBase *sql.DB) *graphql.Object {
 
 func completeRegister(dataBase *sql.DB) *graphql.Field {
 	return &graphql.Field{
-		Type:        CompleteRegistartionType,
+		Type:        CompleteRegistrationType,
 		Description: "Complete Register of new User",
 		Args: graphql.FieldConfigArgument{
 			"hash": &graphql.ArgumentConfig{
@@ -144,7 +144,11 @@ func completeRegisterResolver(dataBase *sql.DB) graphql.FieldResolveFn {
 			}
 		}
 
-		completeReg := models.CompleteRegistration{Successful: ok}
+		jsonSecret := utils.ParseSecret(path + "\\keys.json")
+
+		token, err := utils.CreateToken(jsonSecret, email)
+
+		completeReg := models.CompleteRegistration{Token: token}
 
 		return completeReg, nil
 
