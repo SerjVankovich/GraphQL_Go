@@ -5,7 +5,6 @@ import (
 	"../utils"
 	"database/sql"
 	"errors"
-	"fmt"
 	_ "github.com/lib/pq"
 	"os"
 )
@@ -98,7 +97,6 @@ func UpdateZradlo(db *sql.DB, zradlo *models.Zradlo) (*models.Zradlo, error) {
 		zradlo.Price,
 		zradlo.ID)
 
-	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
@@ -111,5 +109,63 @@ func DeleteZradlo(db *sql.DB, id int) error {
 		return dberr
 	}
 	_, err := db.Exec(`DELETE FROM public.zradlo WHERE "ID" = $1`, id)
+	return err
+}
+
+func InsertUser(db *sql.DB, user *models.User) error {
+	if db == nil {
+		return dberr
+	}
+
+	if user == nil {
+		return errors.New("user field is empty")
+	}
+
+	_, err := db.Exec(`INSERT INTO public.users("id", "email", "password", "confirmed") VALUES (default, $1, $2, $3)`,
+		user.Email,
+		user.Password,
+		false)
+
+	return err
+}
+
+func UpdateUser(db *sql.DB, email string) (bool, error) {
+	if db == nil {
+		return false, dberr
+	}
+
+	_, err := db.Exec(`UPDATE public.users SET "confirmed" = $1 WHERE "email" = $2`, true, email)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func GetUserByEmail(db *sql.DB, email string) (*models.User, error) {
+	if db == nil {
+		return nil, dberr
+	}
+	row := db.QueryRow(`SELECT * FROM public.users WHERE "email" = $1`, email)
+
+	user := new(models.User)
+
+	err := row.Scan(&user.Id, &user.Email, &user.Confirmed, &user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+
+}
+
+func DeleteUser(db *sql.DB, email string) error {
+	if db == nil {
+		return dberr
+	}
+
+	_, err := db.Exec(`DELETE FROM public.users WHERE "email" = $1`, email)
 	return err
 }

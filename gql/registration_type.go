@@ -10,3 +10,12 @@ var RegistrationType = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
+
+var CompleteRegistartionType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CompleteRegistration",
+	Fields: graphql.Fields{
+		"successful": &graphql.Field{
+			Type: graphql.Boolean,
+		},
+	},
+})

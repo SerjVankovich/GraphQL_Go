@@ -37,7 +37,7 @@ func main() {
 	http.HandleFunc("/get-token", handlers.GetTokenHandler(secret).ServeHTTP)
 
 	//register doesn't work
-	http.HandleFunc("/register", handlers.GQLHandler(registerSchema).ServeHTTP)
+	http.HandleFunc("/register", handlers.GQLHandler(registerSchema(dataBase)).ServeHTTP)
 
 	err = http.ListenAndServe(":8080", nil)
 
