@@ -14,6 +14,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"io"
 	"io/ioutil"
+	rand2 "math/rand"
 	"net"
 	"net/mail"
 	"net/smtp"
@@ -30,6 +31,11 @@ type config struct {
 
 type secret struct {
 	JWTSecret string `json:"json-secret"`
+}
+
+type VkConfig struct {
+	ClientId     string `json:"vk-client-id"`
+	ClientSecret string `json:"vk-client-secret"`
 }
 
 type hmac_secret struct {
@@ -318,4 +324,68 @@ func CreateToken(secret []byte, email string) (string, error) {
 	tokenString, err := token.SignedString(secret)
 
 	return tokenString, err
+}
+
+type GoogleCredentials struct {
+	GoogleClientId string `json:"google-client-id"`
+	GoogleSecret   string `json:"google-client-secret"`
+}
+
+func ParseGoogleCredentials(path string) GoogleCredentials {
+	file, err := os.Open(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	byteValue, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var google GoogleCredentials
+
+	err = json.Unmarshal(byteValue, &google)
+	if err != nil {
+		panic(err)
+	}
+
+	return google
+}
+
+func ParseVkCredentials(path string) VkConfig {
+	file, err := os.Open(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	bytevalue, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var vkConfig VkConfig
+
+	err = json.Unmarshal(bytevalue, &vkConfig)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return vkConfig
+}
+
+func GetRandomString(length int) string {
+	rand2.Seed(time.Now().UnixNano())
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=/.,:;")
+	var byteStr []byte
+	for i := 0; i < length; i++ {
+		randInd := rand2.Intn(len(letters))
+		byteStr = append(byteStr, byte(letters[randInd]))
+	}
+
+	return string(byteStr)
 }
